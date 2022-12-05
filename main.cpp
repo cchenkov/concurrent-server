@@ -9,7 +9,7 @@ int main() {
 
     thread_pool tp;
 
-    for (auto i = 1; i <= 500; i++) {
+    for (auto i = 1; i <= 1000; i++) {
         tp.enqueue_work([&, i = i]() {
             std::unique_lock<std::mutex> lock(out_mutex);
             std::cout << "doing work " << i << "...\n";

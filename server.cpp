@@ -23,7 +23,7 @@ void *get_in_addr(struct sockaddr *sa) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
+    if (argc != 2) {
         std::cerr << "usage: server <port>\n";
         return 1;
     }
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     hints.ai_flags = AI_PASSIVE;
 
     if ((rv = getaddrinfo(nullptr, portnum, &hints, &servinfo)) != 0) {
-        std::cerr << "getaddrinfo: " << gai_strerror(rv) << "\n";
+        std::cerr << "server: getaddrinfo: " << gai_strerror(rv) << "\n";
         return 1;
     }
 
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 
     if (p == nullptr) {
         std::cerr << "server: failed to bind\n";
-        return 1;
+        return 2;
     }
 
     if (listen(sockfd, Server::DEFAULT_BACKLOG) == -1) {

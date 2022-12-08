@@ -12,3 +12,8 @@ add_executable(client client.cpp)
 
 target_compile_features(server PRIVATE cxx_std_17)
 target_compile_features(client PRIVATE cxx_std_17)
+
+find_package(Threads REQUIRED)
+
+target_link_libraries(server PRIVATE Threads::Threads)
+target_link_libraries(client PRIVATE Threads::Threads)

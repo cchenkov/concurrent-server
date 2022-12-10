@@ -10,6 +10,8 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
+#include <fmt/core.h>
+
 namespace Server {
     const int DEFAULT_BACKLOG = 10;
 } // namespace Server
@@ -98,15 +100,19 @@ int main(int argc, char *argv[]) {
 
         inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
 
-        std::cout << "server: got connection from " << s << "\n";
+        fmt::print("server: got connection from {}\n", s);
 
         tp.enqueue_work([=]() {
             if (send(newfd, "Hello, world!", 13, 0) == -1) {
                 std::cerr << "server: send failed.\n";
+            } else {
+                fmt::print("server: send for client finished.\n");
             }
 
             close(newfd);
         });
+
+        fmt::print("server: thread pool size = {}\n", tp.size());
     }
 
     return 0;

@@ -1,3 +1,5 @@
+#include "thread_pool.h"
+
 #include <iostream>
 #include <cstring>
 #include <mutex>
@@ -11,7 +13,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
-std::mutex cout_guard;
+#include <fmt/core.h>
 
 namespace Client {
     const int MAXDATASIZE = 100;
@@ -67,10 +69,7 @@ void make_connection(int id, char *hostname, char *portnum) {
 
     inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof s);
 
-    {
-        std::unique_lock guard{cout_guard};
-        std::cout << "client " << id << ": connecting to " << s << "\n";
-    }
+    fmt::print("client {}: connecting to {}\n", id, s);
 
     freeaddrinfo(servinfo);
 
@@ -81,10 +80,7 @@ void make_connection(int id, char *hostname, char *portnum) {
 
     buf[numbytes] = '\0';
 
-    {
-        std::unique_lock guard{cout_guard};
-        std::cout << "client " << id << ": received '" << buf << "'\n";
-    }
+    fmt::print("client {}: received '{}'\n", id, buf); 
 
     close(sockfd);
 }
@@ -99,15 +95,11 @@ int main(int argc, char *argv[])
     char *hostname = argv[1];
     char *portnum = argv[2];
     int n = std::stoi(argv[3]);
-
-    std::vector<std::thread> threads;
-    
-    for (int i = 0; i < n; i++) {
-        threads.push_back(std::thread(make_connection, i, hostname, portnum));
-    }
+   
+    thread_pool tp;
 
     for (int i = 0; i < n; i++) {
-        threads.at(i).join();
+        tp.enqueue_work(make_connection, i, hostname, portnum);
     }
 
     return 0;

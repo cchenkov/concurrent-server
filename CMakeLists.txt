@@ -7,6 +7,17 @@ project(
     LANGUAGES CXX
 )
 
+# Add fmt dependency
+include(FetchContent)
+
+FetchContent_Declare(
+  fmtlib
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG 5.3.0
+)
+
+FetchContent_MakeAvailable(fmtlib)
+
 add_executable(server server.cpp)
 add_executable(client client.cpp)
 
@@ -15,5 +26,5 @@ target_compile_features(client PRIVATE cxx_std_17)
 
 find_package(Threads REQUIRED)
 
-target_link_libraries(server PRIVATE Threads::Threads)
-target_link_libraries(client PRIVATE Threads::Threads)
+target_link_libraries(server PRIVATE Threads::Threads fmt::fmt)
+target_link_libraries(client PRIVATE Threads::Threads fmt::fmt)

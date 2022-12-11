@@ -3,11 +3,7 @@
 #include <iostream>
 #include <cstring>
 #include <mutex>
-#include <thread>
-#include <vector>
-#include <errno.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
@@ -19,8 +15,7 @@ namespace Client {
     const int MAXDATASIZE = 100;
 } // namespace Client
 
-void *get_in_addr(struct sockaddr *sa)
-{
+void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in*)sa)->sin_addr);
     }
@@ -85,8 +80,7 @@ void make_connection(int id, char *hostname, char *portnum) {
     close(sockfd);
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     if (argc != 4) {
         std::cerr << "usage: client <hostname> <port> <number of clients>\n";
         return 1;

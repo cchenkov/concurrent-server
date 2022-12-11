@@ -20,13 +20,13 @@ public:
 
         auto worker = [this]() {
             while (true) {
-                job_t job;
+                task_t task;
                 
-                if (!m_queue.pop(job)) {
+                if (!m_queue.pop(task)) {
                     break;
                 }
 
-                job();
+                task();
             }
         };
 
@@ -68,9 +68,19 @@ public:
         return result;
     }
 
+    void run_pending_task() {
+        task_t task;
+
+        if (m_queue.try_pop(task)) {
+            task();
+        } else {
+            std::this_thread::yield();
+        }
+    }
+
 private:
-    using job_t = std::function<void()>;
-    using queue_t = safe_queue<job_t>;
+    using task_t = std::function<void()>;
+    using queue_t = safe_queue<task_t>;
     using threads_t = std::vector<std::thread>;
 
     queue_t m_queue;

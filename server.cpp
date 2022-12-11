@@ -111,8 +111,6 @@ int main(int argc, char *argv[]) {
 
             close(newfd);
         });
-
-        fmt::print("server: thread pool size = {}\n", tp.size());
     }
 
     return 0;

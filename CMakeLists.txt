@@ -18,13 +18,23 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(fmtlib)
 
+add_executable(omp_qsort_test omp_qsort_test.cpp)
+add_executable(tp_qsort_test tp_qsort_test.cpp)
 add_executable(server server.cpp)
 add_executable(client client.cpp)
 
+target_compile_features(omp_qsort_test PRIVATE cxx_std_17)
+target_compile_features(tp_qsort_test PRIVATE cxx_std_17)
 target_compile_features(server PRIVATE cxx_std_17)
 target_compile_features(client PRIVATE cxx_std_17)
 
 find_package(Threads REQUIRED)
+find_package(OpenMP)
 
+target_link_libraries(tp_qsort_test PRIVATE Threads::Threads)
 target_link_libraries(server PRIVATE Threads::Threads fmt::fmt)
 target_link_libraries(client PRIVATE Threads::Threads fmt::fmt)
+
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(omp_qsort_test PUBLIC OpenMP::OpenMP_CXX)
+endif()

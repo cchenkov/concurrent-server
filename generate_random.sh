@@ -1,6 +1,10 @@
 #!/bin/bash
+
+N=${1:-10}
+
 RANDOM=$$
-for i in `seq 1000000`
+
+for i in `seq $N`
 do
     echo $RANDOM
 done

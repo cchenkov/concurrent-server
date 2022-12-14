@@ -42,7 +42,7 @@ void make_connection(int id, char *hostname, char *portnum) {
         return;
     }
 
-    for(p = servinfo; p != nullptr; p = p->ai_next) {
+    for (p = servinfo; p != nullptr; p = p->ai_next) {
         if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
             std::cerr << "client: socket failed\n";
             continue;

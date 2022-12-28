@@ -1,3 +1,4 @@
+#include "constants.h"
 #include "thread_pool.h"
 
 #include <iostream>
@@ -11,10 +12,6 @@
 #include <arpa/inet.h>
 
 #include <fmt/core.h>
-
-namespace Server {
-    const int DEFAULT_BACKLOG = 10;
-} // namespace Server
 
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
@@ -77,7 +74,7 @@ int main(int argc, char *argv[]) {
         return 2;
     }
 
-    if (listen(sockfd, Server::DEFAULT_BACKLOG) == -1) {
+    if (listen(sockfd, DEFAULT_BACKLOG) == -1) {
         std::cerr << "server: listen failed\n";
         return 1;
     }

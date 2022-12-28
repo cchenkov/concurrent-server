@@ -22,11 +22,13 @@ add_executable(omp_qsort_test omp_qsort_test.cpp)
 add_executable(tp_qsort_test tp_qsort_test.cpp)
 add_executable(server server.cpp)
 add_executable(client client.cpp)
+add_executable(pack_test pack_test.cpp)
 
 target_compile_features(omp_qsort_test PRIVATE cxx_std_17)
 target_compile_features(tp_qsort_test PRIVATE cxx_std_17)
 target_compile_features(server PRIVATE cxx_std_17)
 target_compile_features(client PRIVATE cxx_std_17)
+target_compile_features(pack_test PRIVATE cxx_std_11)
 
 find_package(Threads REQUIRED)
 find_package(OpenMP)

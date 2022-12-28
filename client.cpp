@@ -1,3 +1,4 @@
+#include "constants.h"
 #include "thread_pool.h"
 
 #include <iostream>
@@ -10,10 +11,6 @@
 #include <arpa/inet.h>
 
 #include <fmt/core.h>
-
-namespace Client {
-    const int MAXDATASIZE = 100;
-} // namespace Client
 
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
@@ -31,7 +28,7 @@ void make_connection(int id, char *hostname, char *portnum) {
     struct addrinfo *servinfo;
     struct addrinfo *p;
     char s[INET6_ADDRSTRLEN];
-    char buf[Client::MAXDATASIZE];
+    char buf[MAX_BUFFER_SIZE];
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -68,7 +65,7 @@ void make_connection(int id, char *hostname, char *portnum) {
 
     freeaddrinfo(servinfo);
 
-    if ((numbytes = recv(sockfd, buf, Client::MAXDATASIZE - 1, 0)) == -1) {
+    if ((numbytes = recv(sockfd, buf, MAX_BUFFER_SIZE - 1, 0)) == -1) {
         std::cerr << "client: recv failed\n";
         return;
     }

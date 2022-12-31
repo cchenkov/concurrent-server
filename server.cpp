@@ -1,5 +1,7 @@
 #include "constants.h"
 #include "thread_pool.h"
+#include "pack.h"
+#include "utils.h"
 
 #include <iostream>
 #include <cstring>
@@ -100,7 +102,14 @@ int main(int argc, char *argv[]) {
         fmt::print("server: got connection from {}\n", s);
 
         tp.enqueue_work([=]() {
-            if (send(newfd, "Hello, world!", 13, 0) == -1) {
+            char data[14] = "Hello, world!";
+            char buf[18];
+
+            create_packet(data, 14, buf);
+
+            int len = 18;
+
+            if (sendall(newfd, buf, &len) == -1) {
                 std::cerr << "server: send failed.\n";
             } else {
                 fmt::print("server: send for client finished.\n");

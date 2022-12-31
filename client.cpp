@@ -1,5 +1,7 @@
 #include "constants.h"
 #include "thread_pool.h"
+#include "pack.h"
+#include "utils.h"
 
 #include <iostream>
 #include <cstring>
@@ -28,7 +30,7 @@ void make_connection(int id, char *hostname, char *portnum) {
     struct addrinfo *servinfo;
     struct addrinfo *p;
     char s[INET6_ADDRSTRLEN];
-    char buf[MAX_BUFFER_SIZE];
+    char buf[MAX_PACKET_SIZE];
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -65,12 +67,15 @@ void make_connection(int id, char *hostname, char *portnum) {
 
     freeaddrinfo(servinfo);
 
-    if ((numbytes = recv(sockfd, buf, MAX_BUFFER_SIZE - 1, 0)) == -1) {
+    int len;
+
+    // if ((numbytes = recv(sockfd, buf, MAX_PACKET_SIZE - 1, 0)) == -1) {
+    if (recvall(sockfd, buf, &len) == -1) {
         std::cerr << "client: recv failed\n";
         return;
     }
 
-    buf[numbytes] = '\0';
+    buf[len] = '\0';
 
     fmt::print("client {}: received '{}'\n", id, buf); 
 

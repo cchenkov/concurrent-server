@@ -30,7 +30,6 @@ void make_connection(int id, char *hostname, char *portnum) {
     struct addrinfo *servinfo;
     struct addrinfo *p;
     char s[INET6_ADDRSTRLEN];
-    char buf[MAX_PACKET_SIZE];
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -67,17 +66,36 @@ void make_connection(int id, char *hostname, char *portnum) {
 
     freeaddrinfo(servinfo);
 
-    int len;
+    // construct data packet
+    int arr[5] = { 7, 6, 9, 1, 4 };
+    char data[14];
+    unsigned char arr_len[ARRAY_SIZE_BYTES];
+    packi32(arr_len, 5);
 
-    // if ((numbytes = recv(sockfd, buf, MAX_PACKET_SIZE - 1, 0)) == -1) {
-    if (recvall(sockfd, buf, &len) == -1) {
-        std::cerr << "client: recv failed\n";
-        return;
+    int i = 0;
+
+    for (; i < ARRAY_SIZE_BYTES; i++) {
+        data[i] = arr_len[i];
     }
 
-    buf[len] = '\0';
+    i = ARRAY_SIZE_BYTES;
 
-    fmt::print("client {}: received '{}'\n", id, buf); 
+    for (int j = 0; j < 5; j++) {
+        unsigned char num[2];
+        packi16(num, arr[j]);
+        data[i] = num[0];
+        data[i + 1] = num[1];
+        i += 2;
+    }
+
+    char buf[18];
+    create_packet(data, 14, buf);
+
+    int len = 18;
+
+    if (sendall(sockfd, buf, &len) == -1) {
+        std::cerr << "client: send failed\n";
+    }
 
     close(sockfd);
 }

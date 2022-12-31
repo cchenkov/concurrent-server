@@ -102,21 +102,42 @@ int main(int argc, char *argv[]) {
         fmt::print("server: got connection from {}\n", s);
 
         tp.enqueue_work([=]() {
-            char data[14] = "Hello, world!";
-            char buf[18];
+            char buf[MAX_PACKET_SIZE];
+            int len;
 
-            create_packet(data, 14, buf);
-
-            int len = 18;
-
-            if (sendall(newfd, buf, &len) == -1) {
-                std::cerr << "server: send failed.\n";
+            if (recvall(newfd, buf, &len) == -1) {
+                std::cerr << "server: recvall failed\n";
             } else {
-                fmt::print("server: send for client finished.\n");
+                int array_size = unpacki32((unsigned char *)buf);
+
+                std::cout << "server: received ";
+
+                for (int i = 4; i < len; i += 2) {
+                    std::cout << unpacki16((unsigned char *)(buf + i)) << " ";
+                }
+
+                std::cout << "\n";
             }
 
             close(newfd);
         });
+
+        // tp.enqueue_work([=]() {
+        //     char data[14] = "Hello, world!";
+        //     char buf[18];
+
+        //     create_packet(data, 14, buf);
+
+        //     int len = 18;
+
+        //     if (sendall(newfd, buf, &len) == -1) {
+        //         std::cerr << "server: send failed\n";
+        //     } else {
+        //         fmt::print("server: send for client finished\n");
+        //     }
+
+        //     close(newfd);
+        // });
     }
 
     return 0;

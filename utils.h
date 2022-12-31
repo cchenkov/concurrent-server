@@ -57,7 +57,6 @@ int recvall(int sock, char *buf, int *len) {
         bytes_left -= bytes_recv;
     }
 
-
     int packet_size = unpacki32(packet_len);
 
     total = 0;

@@ -76,7 +76,29 @@ void make_connection(int id, char *hostname, char *portnum) {
     create_packet(data, 14, buf);
 
     if (sendall(sockfd, buf, &len) == -1) {
-        std::cerr << "client: send failed\n";
+        std::cerr << "client: sendall failed\n";
+    } else {
+        if (recvall(sockfd, buf, &len) == -1) {
+            std::cerr << "client: recvall failed\n";
+        } else {
+            int array_size = unpacki32((unsigned char *)buf);
+            int *array = new int[array_size];
+            int idx = 0;
+
+            for (int i = ARRAY_LENGTH_BYTES; i < len; i += 2) {
+                array[idx++] = unpacki16((unsigned char *)(buf + i));
+            }
+
+            std::cout << "client: received ";
+
+            for (int i = 0; i < array_size; i++) {
+                std::cout << array[i] << " ";
+            }
+
+            std::cout << "\n";
+
+            delete[] array;
+        }
     }
 
     close(sockfd);

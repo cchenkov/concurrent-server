@@ -2,6 +2,7 @@
 #include "thread_pool.h"
 #include "pack.h"
 #include "utils.h"
+#include "quicksort.h"
 
 #include <iostream>
 #include <cstring>
@@ -109,35 +110,47 @@ int main(int argc, char *argv[]) {
                 std::cerr << "server: recvall failed\n";
             } else {
                 int array_size = unpacki32((unsigned char *)buf);
+                int *array = new int[array_size];
+                int idx = 0;
 
                 std::cout << "server: received ";
 
-                for (int i = 4; i < len; i += 2) {
-                    std::cout << unpacki16((unsigned char *)(buf + i)) << " ";
+                for (int i = ARRAY_LENGTH_BYTES; i < len; i += 2) {
+                    array[idx++] = unpacki16((unsigned char *)(buf + i));
+                    std::cout << array[idx - 1] << " ";
                 }
 
                 std::cout << "\n";
+
+                qsort_seq(array, 0, array_size - 1);
+
+                std::cout << "server: sorted ";
+
+                for (int i = 0; i < array_size; i++) {
+                    std::cout << array[i] << " ";
+                }
+
+                std::cout << "\n";
+
+                int datasize = array_size * 2 + ARRAY_LENGTH_BYTES;
+                int resbuflen = datasize + PACKET_LENGTH_BYTES;
+                char *data = new char[datasize];
+                char *resbuf = new char[resbuflen];
+                
+                pack_array(array, array_size, data);
+                create_packet(data, datasize, resbuf);
+
+                if (sendall(newfd, resbuf, &resbuflen) == -1) {
+                    std::cerr << "server: sendall failed\n";
+                } 
+
+                delete[] data;
+                delete[] resbuf;
+                delete[] array;
             }
 
             close(newfd);
         });
-
-        // tp.enqueue_work([=]() {
-        //     char data[14] = "Hello, world!";
-        //     char buf[18];
-
-        //     create_packet(data, 14, buf);
-
-        //     int len = 18;
-
-        //     if (sendall(newfd, buf, &len) == -1) {
-        //         std::cerr << "server: send failed\n";
-        //     } else {
-        //         fmt::print("server: send for client finished\n");
-        //     }
-
-        //     close(newfd);
-        // });
     }
 
     return 0;

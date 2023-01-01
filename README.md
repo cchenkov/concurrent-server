@@ -1,4 +1,4 @@
-# Packet Definition
+## Protocol
 
 [packet length] [array size] [array of integers]
 

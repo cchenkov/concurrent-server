@@ -1,5 +1,6 @@
 #include "constants.h"
 #include "pack.h"
+#include "strutils.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -10,13 +11,8 @@ void create_packet(char *data, int len, char *out) {
     unsigned char packet_len[PACKET_LENGTH_BYTES];
     packi32(packet_len, len);
 
-    for (int i = 0; i < PACKET_LENGTH_BYTES; i++) {
-        out[i] = packet_len[i];
-    }
-
-    for (int i = 0; i < len; i++) {
-        out[i + PACKET_LENGTH_BYTES] = data[i];
-    }
+    strcopy(out, (char *)packet_len, PACKET_LENGTH_BYTES);
+    strconcat(out, PACKET_LENGTH_BYTES, data, len);
 }
 
 int sendall(int sock, char *buf, int *len) {

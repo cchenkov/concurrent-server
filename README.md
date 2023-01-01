@@ -2,8 +2,8 @@
 
 [packet length] [array size] [array of integers]
 
-[packet length] - 4 bytes
-[array size] - 4 bytes
+[packet length] - 4 bytes  
+[array size] - 4 bytes  
 [array of integers] - 1492 bytes
 
 Max packet size = 1500 bytes

@@ -11,8 +11,21 @@ void create_packet(char *data, int len, char *out) {
     unsigned char packet_len[PACKET_LENGTH_BYTES];
     packi32(packet_len, len);
 
-    strcopy(out, (char *)packet_len, PACKET_LENGTH_BYTES);
+    strcopy(out, (char *) packet_len, PACKET_LENGTH_BYTES);
     strconcat(out, PACKET_LENGTH_BYTES, data, len);
+}
+
+void pack_array(int *arr, int len, char *out) {
+    unsigned char arr_len[ARRAY_LENGTH_BYTES];
+    packi32(arr_len, len);
+
+    strcopy(out, (char *)arr_len, ARRAY_LENGTH_BYTES);
+
+    for (int i = 0; i < len; i++) {
+        unsigned char curr[2];
+        packi16(curr, arr[i]);
+        strconcat(out, ARRAY_LENGTH_BYTES + i * 2, (char *) curr, 2);
+    }
 }
 
 int sendall(int sock, char *buf, int *len) {

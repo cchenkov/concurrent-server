@@ -68,30 +68,12 @@ void make_connection(int id, char *hostname, char *portnum) {
 
     // construct data packet
     int arr[5] = { 7, 6, 9, 1, 4 };
-    char data[14];
-    unsigned char arr_len[ARRAY_SIZE_BYTES];
-    packi32(arr_len, 5);
-
-    int i = 0;
-
-    for (; i < ARRAY_SIZE_BYTES; i++) {
-        data[i] = arr_len[i];
-    }
-
-    i = ARRAY_SIZE_BYTES;
-
-    for (int j = 0; j < 5; j++) {
-        unsigned char num[2];
-        packi16(num, arr[j]);
-        data[i] = num[0];
-        data[i + 1] = num[1];
-        i += 2;
-    }
-
-    char buf[18];
-    create_packet(data, 14, buf);
-
     int len = 18;
+    char buf[18];
+    char data[14];
+
+    pack_array(arr, 5, data);
+    create_packet(data, 14, buf);
 
     if (sendall(sockfd, buf, &len) == -1) {
         std::cerr << "client: send failed\n";

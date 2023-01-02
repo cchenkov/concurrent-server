@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 
 #include <fmt/core.h>
+#include <fmt/ranges.h>
 
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
@@ -66,40 +67,35 @@ void make_connection(int id, char *hostname, char *portnum) {
 
     freeaddrinfo(servinfo);
 
-    // construct data packet
-    int arr[5] = { 7, 6, 9, 1, 4 };
-    int len = 18;
-    char buf[18];
-    char data[14];
+    // pack
+    std::vector<int> vec = { 7, 6, 9, 1, 4 };
+    std::vector<char> input = pack_vec(vec);
+    int len = input.size() + PACKET_LENGTH_BYTES;
+    char *buf = new char[len];
 
-    pack_array(arr, 5, data);
-    create_packet(data, 14, buf);
+    create_packet(input.data(), input.size(), buf);
 
+    // send
     if (sendall(sockfd, buf, &len) == -1) {
         std::cerr << "client: sendall failed\n";
     } else {
+        fmt::print("client: sent {}\n", vec);
+
+        // receive
         if (recvall(sockfd, buf, &len) == -1) {
             std::cerr << "client: recvall failed\n";
         } else {
-            int array_size = unpacki32((unsigned char *)buf);
-            int *array = new int[array_size];
-            int idx = 0;
+            // unpack
+            std::vector<char> res_vec;
+            res_vec.reserve(len);
+            res_vec.insert(res_vec.begin(), buf, buf + len);
+            std::vector<int> output = unpack_vec(res_vec);
 
-            for (int i = ARRAY_LENGTH_BYTES; i < len; i += 2) {
-                array[idx++] = unpacki16((unsigned char *)(buf + i));
-            }
-
-            std::cout << "client: received ";
-
-            for (int i = 0; i < array_size; i++) {
-                std::cout << array[i] << " ";
-            }
-
-            std::cout << "\n";
-
-            delete[] array;
+            fmt::print("client: received {}\n", output);
         }
     }
+
+    delete[] buf;
 
     close(sockfd);
 }

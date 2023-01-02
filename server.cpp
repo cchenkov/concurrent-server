@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 
 #include <fmt/core.h>
+#include <fmt/ranges.h>
 
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
@@ -115,43 +116,29 @@ int main(int argc, char *argv[]) {
             if (recvall(newfd, buf, &len) == -1) {
                 std::cerr << "server: recvall failed\n";
             } else {
-                int size = unpacki32((unsigned char *)buf);
+                // unpack
+                std::vector<char> buf_vec;
+                buf_vec.reserve(len);
+                buf_vec.insert(buf_vec.begin(), buf, buf + len);
+                std::vector<int> input = unpack_vec(buf_vec);
 
-                std::vector<int> vec;
-                vec.reserve(size);
+                // sort
+                fmt::print("server: received {}\n", input);
+                qsort_seq(input.begin(), input.end());
+                fmt::print("server: sorted {}\n", input);
 
-                std::cout << "server: received ";
-
-                for (int i = ARRAY_LENGTH_BYTES; i < len; i += 2) {
-                    vec.push_back(unpacki16((unsigned char *)(buf + i)));
-                    std::cout << vec.back() << " ";
-                }
-
-                std::cout << "\n";
-
-                qsort_seq(vec.begin(), vec.end());
-
-                std::cout << "server: sorted ";
-
-                for (std::size_t i = 0; i < vec.size(); i++) {
-                    std::cout << vec[i] << " ";
-                }
-
-                std::cout << "\n";
-
-                int data_size = size * 2 + ARRAY_LENGTH_BYTES;
-                int res_len = data_size + PACKET_LENGTH_BYTES;
-                char *data = new char[data_size];
+                // pack
+                std::vector<char> output = pack_vec(input);
+                int res_len = output.size() + PACKET_LENGTH_BYTES;
                 char *res = new char[res_len];
                 
-                pack_array(vec.data(), vec.size(), data);
-                create_packet(data, data_size, res);
+                create_packet(output.data(), output.size(), res);
 
+                // send
                 if (sendall(newfd, res, &res_len) == -1) {
                     std::cerr << "server: sendall failed\n";
                 } 
 
-                delete[] data;
                 delete[] res;
             }
 

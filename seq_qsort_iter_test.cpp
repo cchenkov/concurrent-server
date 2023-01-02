@@ -40,7 +40,7 @@ void fill_from_file(std::vector<int> &vec, std::istream &in) {
 }
 
 int main(int argc, char *argv[]) {
-    constexpr int size = 10000000;
+    constexpr int size = 1000000;
     std::vector<int> vec;
     vec.reserve(size);
 

@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
 
                 // sort
                 fmt::print("server: received {}\n", input);
-                qsort_seq(input.begin(), input.end());
+                qsort_par(input.begin(), input.end());
                 fmt::print("server: sorted {}\n", input);
 
                 // pack

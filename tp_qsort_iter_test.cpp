@@ -43,7 +43,7 @@ void fill_from_file(std::vector<int> &vec, std::istream &in) {
 int main(int argc, char *argv[]) {
     int num_threads = argc > 1 ? std::stoi(argv[1]) : std::thread::hardware_concurrency();
 
-    constexpr int size = 100000;
+    constexpr int size = 1000000;
     std::vector<int> vec;
     vec.reserve(size);
 

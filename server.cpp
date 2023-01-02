@@ -2,6 +2,7 @@
 #include "thread_pool.h"
 #include "pack.h"
 #include "utils.h"
+#include "strutils.h"
 #include "quicksort.h"
 
 #include <iostream>
@@ -31,6 +32,11 @@ int main(int argc, char *argv[]) {
     }
 
     char *portnum = argv[1];
+
+    if (!is_numeric(portnum)) {
+        std::cerr << "server: invalid port number\n";
+        return 1;
+    }
 
     int rv;
     int sockfd;
@@ -122,7 +128,7 @@ int main(int argc, char *argv[]) {
 
                 std::cout << "\n";
 
-                qsort_seq(array, 0, array_size - 1);
+                qsort_par(array, 0, array_size - 1);
 
                 std::cout << "server: sorted ";
 

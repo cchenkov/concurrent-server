@@ -102,3 +102,7 @@ cmake --build build
 ./test.sh
 ```
 
+## Източници
+
+* https://beej.us/guide/bgnet/html/
+* https://eli.thegreenplace.net/2017/concurrent-servers-part-1-introduction/

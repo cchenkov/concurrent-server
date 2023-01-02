@@ -28,6 +28,15 @@ void pack_array(int *arr, int len, char *out) {
     }
 }
 
+void unpack_array(char *in, int *arr, int *len) {
+    *len = unpacki32((unsigned char *)in);
+    arr = new int[len];
+    
+    for (int i = ARRAY_LENGTH_BYTES, idx = 0; i < len; i += 2) {
+        arr[idx++] = unpacki16((unsigned char *)(buf + i));
+    }
+}
+
 int sendall(int sock, char *buf, int *len) {
     int total = 0;
     int bytes_left = *len;

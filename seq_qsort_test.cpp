@@ -4,7 +4,6 @@
 #include <fstream>
 #include <chrono>
 #include <ctime>
-#include <thread>
 
 template <
     class result_t   = std::chrono::milliseconds,
@@ -39,26 +38,22 @@ void fill_from_file(int *arr, std::size_t size, std::istream &in) {
 }
 
 int main(int argc, char *argv[]) {
-    int num_threads = argc > 1 ? std::stoi(argv[1]) : std::thread::hardware_concurrency();
-
-    constexpr int size = 10000;
+    constexpr int size = 1000000;
     int arr[size];
 
     std::ifstream in{"input"};
 
     fill_from_file(arr, size, in);
 
-    ParallelQSort<int> pqs;
-    
     auto start = std::chrono::steady_clock::now();
     
-    pqs.sort(arr, size);
+    qsort_seq(arr, 0, size - 1);
    
     auto end = std::chrono::steady_clock::now();
 
     std::cout << "Time: " 
               << std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count() 
-              << " (s) - Thread Pool\n";
+              << " (s) - Sequential\n";
 
     print_arr(arr, size);
 

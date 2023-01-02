@@ -16,9 +16,9 @@ auto since(std::chrono::time_point<clock_t, duration_t> const& start) {
 }
 
 template <typename T>
-void print_arr(T *arr, std::size_t size) {
-    for (std::size_t i = 0; i < size; i++) {
-        std::cout << arr[i] << "\n";
+void print_vec(std::vector<T> &vec) {
+    for (T elem : vec) {
+        std::cout << elem << "\n";
     }
 
     std::cout << "\n";
@@ -32,27 +32,30 @@ void fill_random_array(int *arr, std::size_t size) {
     }
 }
 
-void fill_from_file(int *arr, std::size_t size, std::istream &in) {
-    for (std::size_t i = 0; i < size; i++) {
-        in >> arr[i];
+void fill_from_file(std::vector<int> &vec, std::istream &in) {
+    for (std::size_t i = 0; i < vec.capacity(); i++) {
+        int n;
+        in >> n;
+        vec.push_back(n);
     }
 }
 
 int main(int argc, char *argv[]) {
     int num_threads = argc > 1 ? std::stoi(argv[1]) : std::thread::hardware_concurrency();
 
-    constexpr int size = 10000;
-    int arr[size];
+    constexpr int size = 100000;
+    std::vector<int> vec;
+    vec.reserve(size);
 
     std::ifstream in{"input"};
 
-    fill_from_file(arr, size, in);
+    fill_from_file(vec, in);
 
-    ParallelQSort<int> pqs;
+    ParallelQVSort<int> pqs;
     
     auto start = std::chrono::steady_clock::now();
     
-    pqs.sort(arr, size);
+    pqs.sort(vec.begin(), vec.end());
    
     auto end = std::chrono::steady_clock::now();
 
@@ -60,7 +63,7 @@ int main(int argc, char *argv[]) {
               << std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count() 
               << " (s) - Thread Pool\n";
 
-    print_arr(arr, size);
+    print_vec(vec);
 
     return 0;
 }

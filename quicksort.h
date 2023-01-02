@@ -4,6 +4,7 @@
 #include "thread_pool.h"
 
 #include <cmath>
+#include <vector>
 
 #include <omp.h>
 
@@ -45,6 +46,44 @@ void qsort_par(T *arr, int low, int high) {
     }
 }
 
+template <typename RandomIt>
+RandomIt partition(RandomIt first, RandomIt last) {
+    auto i = first;
+    auto j = std::prev(last);
+    auto pivot = *(std::next(i, std::distance(i, j) / 2));
+    
+    if (*i < pivot) while (*++i < pivot);
+    if (*j > pivot) while (*--j > pivot);
+
+    while (i < j) {
+        std::iter_swap(i, j);
+        while (*++i < pivot);
+        while (*--j > pivot);
+    }
+
+    return std::next(j);
+}
+
+template <typename RandomIt>
+void qsort_seq(RandomIt first, RandomIt last) {
+    if (std::distance(first, last) > 1) {
+        RandomIt pivot = partition(first, last);
+        qsort_seq(first, pivot);
+        qsort_seq(pivot, last);
+    }
+}
+
+template <typename RandomIt>
+void qsort_par(RandomIt first, RandomIt last) {
+    if (std::distance(first, last) > 1) {
+        RandomIt pivot = partition(first, last);
+        #pragma omp task if(std::distance(first, last) > TASK_LIMIT)
+        qsort_seq(first, pivot);
+        #pragma omp task if(std::distance(first, last) > TASK_LIMIT)
+        qsort_seq(pivot, last);
+    }
+}
+
 template <class T>
 class ParallelQSort {
 public:
@@ -61,13 +100,39 @@ private:
 
             auto low_subpart = tp.enqueue_task(std::bind(&ParallelQSort::qsort_par_tp, this, arr, low, pivot_idx));
 
-            qsort_par(arr, pivot_idx + 1, high);
+            qsort_par_tp(arr, pivot_idx + 1, high);
 
             while (low_subpart.wait_for(std::chrono::seconds(0)) == std::future_status::timeout) {
                 tp.run_pending_task();
             }
+        }
+    }
+    
+private:
+    thread_pool tp;
+};
 
-            low_subpart.get();
+template <class RandomIt>
+class ParallelQVSort {
+public:
+    ParallelQVSort() = default;
+
+    void sort(RandomIt first, RandomIt last) {
+        qsort_par_tp(first, last);
+    }
+
+private:
+    void qsort_par_tp(RandomIt first, RandomIt last) {
+        if (std::distance(first, last) > 1) {
+            RandomIt pivot = partition(first, last);
+
+            auto low_subpart = tp.enqueue_task(std::bind(&ParallelQVSort::qsort_par_tp, this, first, pivot));
+
+            qsort_par_tp(pivot, last);
+
+            while (low_subpart.wait_for(std::chrono::seconds(0)) == std::future_status::timeout) {
+                tp.run_pending_task();
+            }
         }
     }
 

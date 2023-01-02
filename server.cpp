@@ -115,44 +115,44 @@ int main(int argc, char *argv[]) {
             if (recvall(newfd, buf, &len) == -1) {
                 std::cerr << "server: recvall failed\n";
             } else {
-                int array_size = unpacki32((unsigned char *)buf);
-                int *array = new int[array_size];
-                int idx = 0;
+                int size = unpacki32((unsigned char *)buf);
+
+                std::vector<int> vec;
+                vec.reserve(size);
 
                 std::cout << "server: received ";
 
                 for (int i = ARRAY_LENGTH_BYTES; i < len; i += 2) {
-                    array[idx++] = unpacki16((unsigned char *)(buf + i));
-                    std::cout << array[idx - 1] << " ";
+                    vec.push_back(unpacki16((unsigned char *)(buf + i)));
+                    std::cout << vec.back() << " ";
                 }
 
                 std::cout << "\n";
 
-                qsort_par(array, 0, array_size - 1);
+                qsort_seq(vec.begin(), vec.end());
 
                 std::cout << "server: sorted ";
 
-                for (int i = 0; i < array_size; i++) {
-                    std::cout << array[i] << " ";
+                for (std::size_t i = 0; i < vec.size(); i++) {
+                    std::cout << vec[i] << " ";
                 }
 
                 std::cout << "\n";
 
-                int datasize = array_size * 2 + ARRAY_LENGTH_BYTES;
-                int resbuflen = datasize + PACKET_LENGTH_BYTES;
-                char *data = new char[datasize];
-                char *resbuf = new char[resbuflen];
+                int data_size = size * 2 + ARRAY_LENGTH_BYTES;
+                int res_len = data_size + PACKET_LENGTH_BYTES;
+                char *data = new char[data_size];
+                char *res = new char[res_len];
                 
-                pack_array(array, array_size, data);
-                create_packet(data, datasize, resbuf);
+                pack_array(vec.data(), vec.size(), data);
+                create_packet(data, data_size, res);
 
-                if (sendall(newfd, resbuf, &resbuflen) == -1) {
+                if (sendall(newfd, res, &res_len) == -1) {
                     std::cerr << "server: sendall failed\n";
                 } 
 
                 delete[] data;
-                delete[] resbuf;
-                delete[] array;
+                delete[] res;
             }
 
             close(newfd);

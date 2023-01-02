@@ -2,6 +2,8 @@
 #include "pack.h"
 #include "strutils.h"
 
+#include <vector>
+
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -13,6 +15,38 @@ void create_packet(char *data, int len, char *out) {
 
     strcopy(out, (char *) packet_len, PACKET_LENGTH_BYTES);
     strconcat(out, PACKET_LENGTH_BYTES, data, len);
+}
+
+std::vector<char> pack_vec(std::vector<int> &vec) {
+    std::vector<char> res;
+    res.reserve(ARRAY_LENGTH_BYTES + vec.size() * 2);
+
+    unsigned char size[ARRAY_LENGTH_BYTES];
+    packi32(size, vec.size());
+
+    res.insert(res.begin(), size, size + ARRAY_LENGTH_BYTES);
+
+    for (int i = 0; i < vec.size(); i++) {
+        unsigned char n[2];
+        packi16(n, vec[i]);
+        res.insert(res.end(), n, n + 2);
+    }
+
+    return res;
+}
+
+std::vector<int> unpack_vec(std::vector<char> &buf) {
+    int size = unpacki32((unsigned char *)buf.data());
+
+    std::vector<int> vec;
+    vec.reserve(size);
+
+    for (int i = ARRAY_LENGTH_BYTES; i < buf.size(); i += 2) {
+        int n = unpacki16((unsigned char *)(buf.data() + i));
+        vec.push_back(n);
+    }
+
+    return vec;
 }
 
 void pack_array(int *arr, int len, char *out) {
